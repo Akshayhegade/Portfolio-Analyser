@@ -1,0 +1,32 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5001:5000"
+    container_name: portfolio-analyzer-backend
+    volumes:
+      - ./backend:/app/backend
+    restart: unless-stopped
+    networks:
+      - portfolio-network
+    
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    container_name: portfolio-analyzer-frontend
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:5001
+      - WDS_SOCKET_PORT=0  # This fixes hot reload in React when running in Docker
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - portfolio-network
+
+networks:
+  portfolio-network:
+    driver: bridge
