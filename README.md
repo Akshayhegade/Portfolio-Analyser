@@ -33,7 +33,8 @@ A full-stack web application designed to track and analyze various asset classes
 
 - **Backend:** 
   - Python (Flask) RESTful API
-  - In-memory data storage (PostgreSQL integration planned)
+  - PostgreSQL for persistent data storage
+  - Alembic for database migrations
   - JSON-based configuration for symbols
   
 - **Frontend:** 
@@ -62,11 +63,18 @@ Portfolio Analyser/
 ├── backend/                # Python Flask backend
 │   ├── Dockerfile         # Backend container configuration
 │   ├── requirements.txt   # Python dependencies
+│   ├── alembic.ini        # Alembic configuration
 │   ├── app.py             # Main Flask application
 │   ├── data/              # JSON files for symbol data
 │   │   ├── indian_stocks.json
 │   │   └── us_stocks.json
-│   ├── models/            # Data models
+│   ├── migrations/        # Alembic database migrations
+│   │   ├── versions/      # Migration scripts
+│   │   └── env.py         # Alembic environment setup
+│   ├── models/            # Data models (SQLAlchemy)
+│   │   ├── base.py        # Base model for common fields
+│   │   ├── asset.py       # Asset model
+│   │   └── price_history.py # PriceHistory model
 │   ├── services/          # Business logic services
 │   │   ├── symbol_service.py  # Symbol loading and caching
 │   │   └── price_service.py   # Live price fetching
@@ -95,6 +103,7 @@ Portfolio Analyser/
 
 - Docker and Docker Compose installed on your system
 - Git for version control
+- A running PostgreSQL server instance (Docker Compose will set one up for you, or you can use an existing one by configuring `DATABASE_URL` in a `.env` file in the `backend` directory).
 
 ### Running with Docker (Recommended)
 
@@ -104,12 +113,17 @@ Portfolio Analyser/
    cd Portfolio\ Analyser
    ```
 
-2. Start the application using Docker Compose:
+2. Start the application using Docker Compose (this will also start a PostgreSQL service):
    ```bash
    docker-compose up --build
    ```
 
-3. Access the application:
+3. In a separate terminal, once the containers are up and running, apply database migrations:
+   ```bash
+   docker-compose exec backend alembic upgrade head
+   ```
+
+4. Access the application:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:5001
 
@@ -127,7 +141,19 @@ Portfolio Analyser/
    pip install -r requirements.txt
    ```
 
-3. Start the Flask server:
+3. Set up the `DATABASE_URL` environment variable. You can do this by creating a `.env` file in the `backend` directory with the following content:
+   ```env
+   DATABASE_URL="postgresql://your_db_user:your_db_password@your_db_host:your_db_port/your_db_name"
+   ```
+   Replace the placeholders with your actual PostgreSQL connection details. If you used the `docker-compose.yml` to start a PostgreSQL instance, the default URL would be `DATABASE_URL="postgresql://user:password@localhost:5432/portfolio_db"` (assuming the service is named `db` and exposed on `localhost:5432`, and you've configured these credentials in `docker-compose.yml`).
+
+4. Apply database migrations (ensure you are in the `backend` directory and your virtual environment is activated):
+   ```bash
+   alembic upgrade head
+   ```
+   (If `alembic` command is not found directly, try `python -m alembic upgrade head`)
+
+5. Start the Flask server:
    ```bash
    python app.py
    ```
@@ -182,7 +208,7 @@ python run_tests.py
 #### Unit Tests
 - `tests/unit/test_portfolio_model.py` - Tests for portfolio model operations
 - `tests/unit/test_asset_routes.py` - Tests for asset route handlers
-  - Asset creation, retrieval, updates
+  - Tests asset creation, retrieval, updates using an in-memory SQLite database
   - Single and bulk deletion
   - Input validation
   - Error handling
