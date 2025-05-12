@@ -14,7 +14,12 @@ ASSET_TYPE_US_STOCK = "US Stock"
 ASSET_TYPE_CRYPTO = "Crypto"
 
 # API endpoints
-COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/coins/markets'
+COINGECKO_API_URL = 'https://api.coingecko.com/api/v3'
+YHOO_FINANCE_API_URL = 'https://query1.finance.yahoo.com/v8/finance/chart'
+ALPHA_VANTAGE_API_KEY = os.environ.get('ALPHA_VANTAGE_API_KEY', '')
+
+# Cache settings
+PRICE_CACHE_DURATION = 300  # seconds (5 minutes)
 
 # Request timeouts
 REQUEST_TIMEOUT = 15  # seconds

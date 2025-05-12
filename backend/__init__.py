@@ -5,6 +5,7 @@ from backend.config.settings import DEBUG, FLASK_PORT
 from backend.utils.logging import logger
 from backend.routes.assets import assets_bp
 from backend.routes.symbols import symbols_bp
+from backend.routes.prices import price_routes
 from backend.services import symbol_service
 
 
@@ -20,6 +21,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(assets_bp, url_prefix='/assets')
     app.register_blueprint(symbols_bp)
+    app.register_blueprint(price_routes)
     
     # Add a simple root route
     @app.route('/')

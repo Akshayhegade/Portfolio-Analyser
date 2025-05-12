@@ -33,8 +33,8 @@ def load_crypto_symbols() -> List[Dict[str, Any]]:
     }
     
     try:
-        logger.info(f"Fetching crypto symbols from {COINGECKO_API_URL}...")
-        response = requests.get(COINGECKO_API_URL, params=params, timeout=REQUEST_TIMEOUT)
+        logger.info(f"Fetching crypto symbols from {COINGECKO_API_URL}/coins/markets...")
+        response = requests.get(f"{COINGECKO_API_URL}/coins/markets", params=params, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()  
         data = response.json()
         
