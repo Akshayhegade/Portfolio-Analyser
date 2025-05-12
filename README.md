@@ -16,6 +16,7 @@ A full-stack web application designed to track and analyze various asset classes
   - Track performance of individual assets
   - Live price updates for all assets
   - Real-time profit/loss calculations
+  - Interactive data visualizations and charts
 
 - **Symbol Management**:
   - Indian and US stock symbols stored in JSON files for easy maintenance
@@ -38,6 +39,8 @@ A full-stack web application designed to track and analyze various asset classes
 - **Frontend:** 
   - React 19 with Material UI components
   - Responsive design for desktop and mobile views
+  - Custom theming and elegant UI styling
+  - Data visualization using Recharts library
   - Environment variable configuration for API endpoints
 
 - **Deployment:** 
@@ -77,8 +80,10 @@ Portfolio Analyser/
 │       ├── components/    # React components
 │       │   ├── AssetList.js       # Asset list with inline editing
 │       │   ├── AddAssetForm.js    # Form for adding new assets
-│       │   └── LivePriceInfo.js   # Live price display component
+│       │   ├── LivePriceInfo.js   # Live price display component
+│       │   └── PortfolioCharts.js # Data visualization components
 │       ├── App.js         # Main React application
+│       ├── theme.js       # Custom Material UI theme
 │       └── config.js      # Frontend configuration
 │
 └── README.md             # Project documentation

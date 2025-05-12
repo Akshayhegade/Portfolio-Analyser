@@ -15,8 +15,17 @@ def create_app():
     """
     app = Flask(__name__)
     
-    # Enable CORS for all routes (fine for development)
-    CORS(app)
+    # Disable strict slashes to prevent redirects that break CORS preflight
+    app.url_map.strict_slashes = False
+    
+    # Enable CORS for all routes
+    CORS(app, 
+         origins="*", 
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization", "Accept"],
+         supports_credentials=False,
+         automatic_options=True,
+         send_wildcard=True)
     
     # Register blueprints
     app.register_blueprint(assets_bp, url_prefix='/assets')
