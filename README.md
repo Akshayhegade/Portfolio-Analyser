@@ -168,6 +168,56 @@ Portfolio Analyser/
 - `GET /api/prices/<symbol>?type=<asset_type>` - Get price for a specific asset
 - `POST /api/prices/refresh` - Force refresh the price cache
 
+## Testing
+
+### Backend Tests
+
+The backend includes a comprehensive test suite that can be run using the `run_tests.py` script:
+
+```bash
+cd backend
+python run_tests.py
+```
+
+#### Unit Tests
+- `tests/unit/test_portfolio_model.py` - Tests for portfolio model operations
+- `tests/unit/test_asset_routes.py` - Tests for asset route handlers
+  - Asset creation, retrieval, updates
+  - Single and bulk deletion
+  - Input validation
+  - Error handling
+
+#### Integration Tests
+- `tests/integration/test_api_integration.py` - End-to-end API workflow tests
+  - Complete CRUD operations for assets
+  - Bulk operations
+  - API response format validation
+  - Error scenarios
+
+### Frontend Tests
+
+Frontend tests are implemented using React Testing Library and Jest:
+
+```bash
+cd frontend
+npm test
+```
+
+#### Component Tests
+- `src/tests/unit/App.test.js` - Tests for the main App component
+- `src/tests/unit/AssetList.test.js` - Tests for the asset list component
+  - Asset rendering
+  - Inline editing
+  - Deletion operations
+  - Bulk selection and deletion
+
+#### Integration Tests
+- `src/tests/integration/AppIntegration.test.js` - Tests for component interactions
+  - API integration
+  - State management
+  - User interactions
+  - Error handling
+
 ## Future Enhancements
 
 - User authentication and user-specific portfolios
