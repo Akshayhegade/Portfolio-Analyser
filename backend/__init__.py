@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+import os
 
 from backend.config.settings import DEBUG, FLASK_PORT
 from backend.utils.logging import logger
@@ -7,13 +8,30 @@ from backend.routes.assets import assets_bp
 from backend.routes.symbols import symbols_bp
 from backend.routes.prices import price_routes
 from backend.services import symbol_service
+from backend.models import db
 
 
-def create_app():
+def create_app(config_override=None):
     """
     Create and configure the Flask application
     """
     app = Flask(__name__)
+
+    # Default configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///:memory:') # Default to in-memory SQLite if DATABASE_URL is not set
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['TESTING'] = False # Default to not testing
+
+    # Override with provided config
+    if config_override:
+        app.config.update(config_override)
+    
+    # Configure SQLAlchemy
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') # Moved up
+    # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Moved up
+    
+    # Initialize SQLAlchemy
+    db.init_app(app)
     
     # Disable strict slashes to prevent redirects that break CORS preflight
     app.url_map.strict_slashes = False
@@ -37,8 +55,12 @@ def create_app():
     def hello_world():
         return 'Hello from the Portfolio Analyser Backend!'
     
-    # Load symbol data on startup
+    # Load symbol data and initialize database on startup
     with app.app_context():
+        # Create all database tables
+        db.create_all()
+        
+        # Load symbol data
         symbol_service.load_crypto_symbols()
         symbol_service.load_indian_stock_symbols()
         symbol_service.load_us_stock_symbols()
