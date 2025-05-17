@@ -11,18 +11,23 @@ services:
       - portfolio-network
     
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     container_name: portfolio-analyzer-frontend
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_URL=http://localhost:5001
-      - WDS_SOCKET_PORT=0  # This fixes hot reload in React when running in Docker
+      - REACT_APP_API_URL=http://backend:5000  # Using service name for internal communication
+      - NODE_ENV=production
+      - WDS_SOCKET_PORT=0
     volumes:
-      - ./frontend:/app
+      - ./frontend/public:/app/public
+      - ./frontend/src:/app/src
       - /app/node_modules
+      - /app/build
     restart: unless-stopped
     networks:
       - portfolio-network

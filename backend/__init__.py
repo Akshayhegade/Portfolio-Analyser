@@ -18,7 +18,11 @@ def create_app(config_override=None):
     app = Flask(__name__)
 
     # Default configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///:memory:') # Default to in-memory SQLite if DATABASE_URL is not set
+    # Use a file-based SQLite database in the instance folder
+    app.instance_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance')
+    os.makedirs(app.instance_path, exist_ok=True)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{os.path.join(app.instance_path, "portfolio_analyser.db")}')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['TESTING'] = False # Default to not testing
 

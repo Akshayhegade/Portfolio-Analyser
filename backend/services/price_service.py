@@ -114,10 +114,19 @@ class PriceService:
     def get_crypto_price(self, symbol_id: str) -> Optional[float]:
         """
         Get current cryptocurrency price using CoinGecko API
-        Note: symbol_id should be the CoinGecko ID (e.g., 'bitcoin', not 'BTC')
+        Handles both CoinGecko IDs (e.g., 'bitcoin') and trading pairs (e.g., 'btc-usd')
         """
-        # For crypto, the symbol_id might be uppercase, but CoinGecko expects lowercase
+        # Convert to lowercase for consistency
         symbol_id = symbol_id.lower()
+        
+        # If the symbol is in format like 'btc-usd', extract the base symbol
+        if '-' in symbol_id:
+            base_symbol = symbol_id.split('-')[0]
+            # Try to find the CoinGecko ID for this symbol
+            symbol_id = self._find_crypto_id_by_symbol(base_symbol)
+            if not symbol_id:
+                logger.error(f"Could not find CoinGecko ID for symbol: {base_symbol}")
+                return None
         
         # Check cache first with crypto flag set to true
         if self._is_cache_valid(symbol_id, is_crypto=True):
@@ -196,9 +205,50 @@ class PriceService:
             return None
     
     def _find_crypto_id_by_symbol(self, symbol: str) -> Optional[str]:
-        """Find the CoinGecko ID for a given crypto symbol"""
+        """
+        Find the CoinGecko ID for a given crypto symbol.
+        Symbol can be either the CoinGecko ID, symbol (e.g., 'btc'), or name (e.g., 'bitcoin')
+        """
+        logger.info(f"Looking up CoinGecko ID for symbol: {symbol}")
+        
         # Get the list of crypto symbols from the symbol service
         crypto_symbols = symbol_service.get_crypto_symbols()
+        
+        if not crypto_symbols:
+            logger.error("No crypto symbols loaded from symbol service!")
+            return None
+            
+        logger.info(f"Loaded {len(crypto_symbols)} crypto symbols from symbol service")
+        
+        # First try exact match on symbol (case-insensitive)
+        for coin in crypto_symbols:
+            if 'symbol' not in coin or 'id' not in coin or 'name' not in coin:
+                logger.warning(f"Malformed coin data: {coin}")
+                continue
+                
+            if coin['symbol'].lower() == symbol.lower() or \
+               coin['id'].lower() == symbol.lower() or \
+               coin['name'].lower() == symbol.lower():
+                logger.info(f"Found exact match for {symbol}: {coin['id']}")
+                return coin['id']
+                
+        # If no exact match, try partial match on name or symbol
+        for coin in crypto_symbols:
+            if 'symbol' not in coin or 'id' not in coin or 'name' not in coin:
+                continue
+                
+            if symbol.lower() in coin['symbol'].lower() or \
+               symbol.lower() in coin['name'].lower() or \
+               symbol.lower() in coin['id'].lower():
+                logger.info(f"Found partial match for {symbol}: {coin['id']}")
+                return coin['id']
+        
+        # Log the first few symbols for debugging
+        sample_symbols = [f"{c.get('id', '?')} ({c.get('symbol', '?')})" for c in crypto_symbols[:5]]
+        logger.warning(f"Could not find CoinGecko ID for symbol: {symbol}")
+        logger.warning(f"Sample of available symbols: {', '.join(sample_symbols)}...")
+        
+        return None
         
         # Normalize the input symbol (uppercase for comparison)
         symbol = symbol.upper()

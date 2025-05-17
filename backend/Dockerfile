@@ -18,14 +18,18 @@ RUN mkdir -p /app/backend
 COPY . /app/backend/
 
 # Set PYTHONPATH to include the /app directory so Python can find modules
-ENV PYTHONPATH="/app:${PYTHONPATH}"
+ENV PYTHONPATH="/app/backend:${PYTHONPATH}"
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
 
 # Define environment variable
-ENV FLASK_APP=backend.app
+ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV PYTHONPATH=/app/backend
 
-# Run app.py when the container launches
-CMD ["flask", "run"]
+# Create the instance directory and seed the database
+RUN mkdir -p /app/instance
+
+# Run the seed script and then start the Flask app
+CMD ["sh", "-c", "cd /app/backend && python seed_db.py && cd /app/backend && flask run --host=0.0.0.0 --port=5000"]

@@ -1,6 +1,8 @@
 # Portfolio Analyser
 
-A full-stack web application designed to track and analyze various asset classes including Indian stocks, US stocks, and cryptocurrencies. The application provides a clean, intuitive interface for managing your investment portfolio.
+A full-stack web application designed to track and analyze various asset classes including Indian stocks, US stocks, and cryptocurrencies. The application provides a clean, intuitive interface for managing your investment portfolio with real-time price updates and performance tracking.
+
+> **Latest Update (May 2024)**: Switched to SQLite database, improved Docker setup, and enhanced error handling for cryptocurrency price fetching.
 
 ## Features
 
@@ -33,9 +35,10 @@ A full-stack web application designed to track and analyze various asset classes
 
 - **Backend:** 
   - Python (Flask) RESTful API
-  - PostgreSQL for persistent data storage
-  - Alembic for database migrations
+  - SQLite for persistent data storage (file-based for development)
+  - SQLAlchemy ORM for database operations
   - JSON-based configuration for symbols
+  - Rate-limited API integrations with Yahoo Finance and CoinGecko
   
 - **Frontend:** 
   - React 19 with Material UI components
@@ -48,6 +51,8 @@ A full-stack web application designed to track and analyze various asset classes
   - Docker containerization for both frontend and backend
   - Docker Compose for orchestration
   - Development and production configurations
+  - Automatic database seeding on container startup
+  - Volume mounting for persistent data storage
 
 - **APIs:** 
   - CoinGecko API for cryptocurrency data and prices
@@ -105,27 +110,42 @@ Portfolio Analyser/
 - Git for version control
 - A running PostgreSQL server instance (Docker Compose will set one up for you, or you can use an existing one by configuring `DATABASE_URL` in a `.env` file in the `backend` directory).
 
-### Running with Docker (Recommended)
+### Installation
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd Portfolio\ Analyser
+   git clone https://github.com/yourusername/portfolio-analyzer.git
+   cd portfolio-analyzer
    ```
 
-2. Start the application using Docker Compose (this will also start a PostgreSQL service):
+2. Start the application:
    ```bash
    docker-compose up --build
    ```
+   This will:
+   - Build and start both frontend and backend containers
+   - Set up the SQLite database
+   - Seed the database with initial data
+   - Start the development servers
 
-3. In a separate terminal, once the containers are up and running, apply database migrations:
-   ```bash
-   docker-compose exec backend alembic upgrade head
-   ```
-
-4. Access the application:
+3. Access the application:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:5001
+
+4. For development, you can also run the services separately:
+   ```bash
+   # Backend
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+   pip install -r requirements.txt
+   flask run --port=5001
+
+   # Frontend (in a new terminal)
+   cd frontend
+   npm install
+   npm start
+   ```
 
 ### Development Setup
 
